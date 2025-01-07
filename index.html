@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影之幻境战绩</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: black;
+            color: white;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .input-container {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-box {
+            width: 60px;
+            margin: 0 5px;
+        }
+
+        .count-select {
+            width: 35px;
+            margin: 0 2px;
+        }
+
+        nav {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #555;
+        }
+
+        nav a.active {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+
+        .table-container,
+        .gradient-container,
+        .share-container {
+            margin-top: 150px;
+            display: none;
+        }
+
+
+        /* 去除表格边框 */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: none;
+            /* 去除边框 */
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            text-align: center;
+            /* 水平居中 */
+            vertical-align: middle;
+            /* 垂直居中 */
+        }
+
+
+        /* 新建行按钮样式 */
+        .add-row-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            /* 居中显示 */
+        }
+
+        .add-row-button:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"].narrow-input {
+            width: calc(100% / 3);
+            box-sizing: border-box;
+        }
+
+        .settlement-input {
+            width: 60px;
+            margin: 0 5px;
+        }
+
+        .edit-button,
+        .confirm-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        .edit-button:hover,
+        .confirm-button:hover {
+            color: #007bff;
+        }
+
+        .edit-button {
+            transform: scaleX(-1);
+        }
+
+        .confirm-button {
+            display: none;
+        }
+
+
+        /* 其他样式保持不变 */
+        .avatar-selector {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            text-align: center;
+            border-radius: 50%;
+            margin: 0 auto;
+            /* 水平居中 */
+            display: block;
+        }
+
+        .avatar-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-selector:hover {
+            background-color: #e0e0e0;
+        }
+
+        .avatar-selector img {
+            display: block;
+        }
+
+        .avatar-selector span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .avatar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .avatar-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+        }
+
+        .avatar-list img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .avatar-list img:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+
+        .modal-content span {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .reset-button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .reset-button:hover {
+            background-color: #cc0000;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .footer {
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h2 style="text-align: left;">影之幻境战绩</h2>
+        <div class="input-container">
+            <h3 style="margin: 0;">初始分:</h3>
+            <input type="number" placeholder="0" class="input-box" id="initial-score" value="0" min="0">
+            <span style="display: inline-block; margin: 0 5px;">第</span>
+            <select class="count-select">
+                <option value="一">一</option>
+                <option value="二">二</option>
+                <option value="三">三</option>
+                <option value="四" selected>四</option>
+                <option value="五">五</option>
+                <option value="六">六</option>
+                <option value="七">七</option>
+                <option value="八">八</option>
+                <option value="九">九</option>
+                <option value="十">十</option>
+            </select>
+            <span style="display: inline-block; margin: 0 2px;">赛季</span>
+            <select class="input-box" style="width: auto;">
+                <option value="双技能" selected>双技能</option>
+                <option value="-">-</option>
+            </select>
+        </div>
+        <button class="reset-button" onclick="resetData()">重置</button>
+    </div>
+    </div>
+
+    <nav>
+        <a href="#record" id="record-tab" onclick="showTab('record')">记录</a>
+        <a href="#gradient" id="gradient-tab" onclick="showTab('gradient')">梯度</a>
+        <a href="#share" id="share-tab" onclick="showTab('share')">分享</a>
+    </nav>
+
+    <div class="table-container" id="record-content">
+        <table>
+            <tr>
+                <th><!-- 新增列 --></th>
+                <th>场次</th>
+                <th>主站者</th>
+                <th>主动技</th>
+                <th>被动技</th>
+                <th>名次</th>
+                <th>结算</th>
+                <th>备注</th>
+                <th></th>
+            </tr>
+            <tr>
+                <td>
+                    <!-- 新增列：放置新建行按钮 -->
+                    <button class="add-row-button" onclick="addRow(this)">+</button>
+                </td>
+                <td>1</td>
+                <!-- 更改主站者列 -->
+                <td>
+                    <div class="avatar-selector" onclick="openAvatarSelector(this)">
+                        <img class="avatar-preview" src="" alt=""
+                            style="width: 50px; height: 50px; border-radius: 50%; display: none;">
+
+                        <span></span>
+                    </div>
+                </td>
+
+                <!-- 更改主动技列 -->
+                <td>
+                    <select class="skill-selector" onchange="selectSkill(this, 'active')">
+                        <option value="">选择主动技</option>
+                        <!-- 主动技选项将在选中主站者后动态生成 -->
+                    </select>
+                </td>
+
+                <!-- 更改被动技列 -->
+                <td>
+                    <select class="skill-selector" onchange="selectSkill(this, 'passive')">
+                        <option value="">选择被动技</option>
+                        <!-- 被动技选项将在选中主站者后动态生成 -->
+                    </select>
+                </td>
+
+                <td>
+                    <select onchange="updateScoreChange(this)">
+                        <option value=""></option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="settlement-input" id="settlement-input" value="" min="0">
+                </td>
+                <td>
+                    <input type="text" class="remark-input" style="display:none;">
+                    <button class="edit-button" onclick="enableRemarkEdit(this)">✎</button>
+                    <button class="confirm-button" onclick="confirmRemark(this)" style="display:none;">✔</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="gradient-container" id="gradient-content">
+        <h2>梯度内容尚未实现</h2>
+    </div>
+
+    <div class="share-container" id="share-content">
+        <h2>分享内容尚未实现</h2>
+    </div>
+
+    <script>
+        // 返回主页函数
+        function goHome() {
+            window.location.reload();
+        }
+
+        // 获取相关元素
+        const initialScoreInput = document.getElementById('initial-score');
+
+        const settlementInput = document.getElementById('settlement-input');
+
+        // 监听“结算”列输入框的变化
+        settlementInput.addEventListener('input', () => {
+            updateCurrentScoreFromSettlement();
+        });
+
+        // 切换显示的内容
+        function showTab(tab) {
+            document.getElementById('record-content').style.display = 'none';
+            document.getElementById('gradient-content').style.display = 'none';
+            document.getElementById('share-content').style.display = 'none';
+
+            if (tab === 'record') {
+                document.getElementById('record-content').style.display = 'block';
+                setActiveLink('record-tab');
+            } else if (tab === 'gradient') {
+                document.getElementById('gradient-content').style.display = 'block';
+                setActiveLink('gradient-tab');
+            } else if (tab === 'share') {
+                document.getElementById('share-content').style.display = 'block';
+                setActiveLink('share-tab');
+            }
+        }
+
+        // 设置活动链接
+        function setActiveLink(activeTabId) {
+            const links = document.querySelectorAll('nav a');
+            links.forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById(activeTabId).classList.add('active');
+        }
+
+        // 编辑备注功能
+        function enableRemarkEdit(button) {
+            const remarkInput = button.parentNode.querySelector('.remark-input');
+            const confirmButton = button.parentNode.querySelector('.confirm-button');
+
+            // 显示输入框和确认按钮
+            remarkInput.style.display = 'inline-block';
+            confirmButton.style.display = 'inline-block';
+            button.style.display = 'none'; // 隐藏编辑按钮
+
+            // 聚焦到输入框
+            remarkInput.focus();
+        }
+
+        // 确认备注内容
+        function confirmRemark(button) {
+            const remarkInput = button.parentNode.querySelector('.remark-input');
+            const editButton = button.parentNode.querySelector('.edit-button');
+
+            // 隐藏输入框和确认按钮
+            remarkInput.style.display = 'none';
+            button.style.display = 'none';
+
+            // 显示编辑按钮
+            editButton.style.display = 'inline-block';
+
+            // 如果输入框有内容，则显示内容
+            if (remarkInput.value.trim() !== "") {
+                const remarkCell = button.parentNode;
+                remarkCell.innerHTML = remarkInput.value +
+                    '<input type="text" class="remark-input" style="display:none;">' +
+                    '<button class="edit-button" onclick="enableRemarkEdit(this)">✎</button>' +
+                    '<button class="confirm-button" onclick="confirmRemark(this)" style="display:none;">✔</button>';
+            }
+        }
+
+        // 新增行功能
+        function addRow(button) {
+            const table = document.querySelector('#record-content table');
+            if (!table) {
+                console.error('未找到表格元素');
+                return;
+            }
+
+            // 获取第一行作为模板
+            const firstRow = table.rows[1];
+            if (!firstRow) {
+                console.error('未找到模板行');
+                return;
+            }
+
+            // 克隆第一行作为新行
+            const newRow = firstRow.cloneNode(true);
+
+            // 更新场次数值
+            const lastRow = table.rows[table.rows.length - 1];
+            const lastMatchNumber = parseInt(lastRow.cells[1].textContent) || 0;
+            newRow.cells[1].textContent = lastMatchNumber + 1;
+
+            // 清空输入框和选择框
+            const inputs = newRow.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.type !== 'file') {
+                    input.value = ''; // 清空输入框内容
+                }
+            });
+
+            const selects = newRow.querySelectorAll('select');
+            selects.forEach(select => {
+                select.selectedIndex = 0; // 初始化选择框为未选择状态
+            });
+
+            // 清空主站者信息
+            const avatarSelector = newRow.querySelector('.avatar-selector');
+            if (avatarSelector) {
+                const avatarPreview = avatarSelector.querySelector('.avatar-preview');
+                const span = avatarSelector.querySelector('span');
+                if (avatarPreview && span) {
+                    avatarPreview.src = '';
+                    avatarPreview.style.display = 'none';
+                    span.style.display = 'block';
+                }
+
+                // 为每个主站者列生成唯一的 ID
+                avatarSelector.id = 'avatar-selector-' + Date.now(); // 使用时间戳生成唯一 ID
+            }
+
+            // 清空主动技和被动技选择
+            const activeSkillSelect = newRow.querySelector('select:nth-child(4)');
+            const passiveSkillSelect = newRow.querySelector('select:nth-child(5)');
+            if (activeSkillSelect && passiveSkillSelect) {
+                activeSkillSelect.innerHTML = '<option value="">选择主动技</option>';
+                passiveSkillSelect.innerHTML = '<option value="">选择被动技</option>';
+            }
+
+            // 清空备注列的内容
+            const remarkCell = newRow.cells[7]; // 备注列是第8列（索引从0开始）
+            remarkCell.innerHTML = `
+        <input type="text" class="remark-input" style="display:none;">
+        <button class="edit-button" onclick="enableRemarkEdit(this)">✎</button>
+        <button class="confirm-button" onclick="confirmRemark(this)" style="display:none;">✔</button>
+    `;
+
+            // 将新行插入到表格中
+            table.appendChild(newRow);
+
+            // 隐藏当前行的“新建行”按钮
+            button.style.display = 'none';
+
+            // 显示最后一行的“新建行”按钮
+            const lastRowAddButton = table.rows[table.rows.length - 1].querySelector('.add-row-button');
+            if (lastRowAddButton) {
+                lastRowAddButton.style.display = 'inline-block';
+            }
+        }
+
+        // 打开主站者选择器
+        function openAvatarSelector(button) {
+            // 图标路径数组
+            const avatarPath = [
+                "img/leader/001-Arisa.jpg",
+                "img/leader/002-Rowen.jpg",
+                "img/leader/003-Eris.jpg",
+                "img/leader/004-Erika.jpg",
+                "img/leader/005-Luna.jpg",
+                "img/leader/006-Yuwan.jpg",
+                "img/leader/007-Isabelle.jpg",
+                "img/leader/008-Urias.jpg",
+                "img/leader/009-Mordecai.jpg",
+                "img/leader/010-Dietrich.jpg",
+                "img/leader/011-Alexiel.jpg",
+                "img/leader/012-Tetra.jpg",
+                "img/leader/013-Farin.jpg",
+                "img/leader/014-Flame&Glass.jpg",
+                "img/leader/015-Drache.jpg",
+                "img/leader/016-Aisha.jpg",
+                "img/leader/017-Dionne.jpg",
+                "img/leader/018-Yuzuki.jpg",
+                "img/leader/019-Amy.jpg",
+                "img/leader/020-Taketsumi.jpg",
+                "img/leader/021-Verdilia.jpg",
+                "img/leader/022-Wolfraud.jpg",
+                "img/leader/023-TacticalDog.jpg",
+                "img/leader/024-Latham.jpg",
+                "img/leader/025-MagnaZero.jpg",
+                "img/leader/026-Wilbert.jpg",
+                "img/leader/027-BellringerAngel.jpg",
+                "img/leader/028-Teo.jpg",
+                "img/leader/029-Iceschillendrig.jpg",
+                "img/leader/030-Aenea.jpg",
+                "img/leader/031-Aiela.jpg",
+                "img/leader/032-Meowskers.jpg",
+                "img/leader/033-Castelle.jpg",
+                "img/leader/034-Zecilwenshe.jpg",
+                "img/leader/035-Spinaria.jpg",
+                "img/leader/036-Katya.jpg",
+                "img/leader/037-Ladica.jpg",
+                "img/leader/038-Maisha.jpg",
+                "img/leader/039-Lucifer.jpg",
+                "img/leader/040-Kuon.jpg",
+                "img/leader/041-Lucille.jpg",
+                "img/leader/042-Ramina.jpg",
+                "img/leader/043-WizardessOfOz.jpg",
+                "img/leader/044-ResplendentPhoenix.jpg",
+                "img/leader/045-Kagero.jpg",
+                "img/leader/046-Omnis.jpg",
+                "img/leader/047-Illganeau.jpg",
+                "img/leader/048-Runie.jpg",
+                "img/leader/049-Nahtnaught.jpg",
+                "img/leader/050-Rola.jpg",
+                "img/leader/051-Aluzard.jpg",
+                "img/leader/052-Hozumi.jpg",
+                "img/leader/053-Vincent.jpg",
+                "img/leader/054-Lyelth.jpg",
+                "img/leader/055-Lapis.jpg",
+                "img/leader/056-Cerberus.jpg"
+            ];
+
+            // 为按钮添加唯一 ID（如果不存在）
+            if (!button.id) {
+                button.id = 'avatar-selector-' + Date.now(); // 使用时间戳生成唯一 ID
+            }
+
+            // 创建模态框
+            const avatarModal = document.createElement('div');
+            avatarModal.className = 'avatar-modal';
+            avatarModal.innerHTML = `
+        <div class="modal-content">
+            <span style="cursor: pointer; font-size: 24px; float: right;" onclick="closeAvatarModal()" aria-label="关闭">✖</span>
+            <div class="avatar-list" style="display: flex; flex-wrap: wrap; justify-content: center;">
+                ${avatarPath.map((path) =>
+                `<img src="${path}" onclick="selectAvatar(this, '${button.id}')" style="width: 50px; height: 50px; margin: 5px; cursor: pointer;">`
+            ).join('')}
+            </div>
+        </div>
+    `;
+            document.body.appendChild(avatarModal);
+
+            // 绑定关闭按钮事件
+            const closeButton = avatarModal.querySelector('.modal-content span');
+            closeButton.addEventListener('click', closeAvatarModal);
+        }
+
+        // 选择主站者
+        function selectAvatar(img, buttonId) {
+            const avatarSelector = document.getElementById(buttonId);
+            if (!avatarSelector) {
+                console.error('未找到对应的主站者选框');
+                return;
+            }
+
+            const avatarPreview = avatarSelector.querySelector('.avatar-preview');
+            const span = avatarSelector.querySelector('span');
+
+            // 更新选框内容
+            avatarPreview.src = img.src;
+            avatarPreview.style.display = 'block';
+            avatarPreview.style.width = '100%';
+            avatarPreview.style.height = '100%';
+            avatarPreview.style.objectFit = 'cover';
+            span.style.display = 'none';
+
+            // 获取当前行的主动技和被动技选择框
+            const row = avatarSelector.closest('tr');
+            const activeSkillSelect = row.querySelector('.skill-selector[onchange*="active"]');
+            const passiveSkillSelect = row.querySelector('.skill-selector[onchange*="passive"]');
+
+            // 清空现有的技能选项
+            activeSkillSelect.innerHTML = '<option value="">选择主动技</option>';
+            passiveSkillSelect.innerHTML = '<option value="">选择被动技</option>';
+
+            // 主动技能名称列表
+            const activeSkills = [
+                "教会庇护", "灵魂转移", "超越时空", "转化的魔法", "不朽的决斗",
+                "绝对守护", "魔力操纵", "冰焰双极", "爆炎的咆哮", "百般武艺",
+                "狂舞之刃", "统率灵魂", "真伪逆转", "无神之盾", "进化是胜利的关键",
+                "死之索偿", "创造之九", "此身即为无限", "夜天的邀约", "万物回归",
+                "英雄诞生", "式神化身", "月兔狂气", "追魂一刀", "引世预言",
+                "召集私兵", "龙炎强化", "永劫回归", "实现之词", "来自冥界的欢迎"
+            ];
+
+            // 被动技能名称列表
+            const passiveSkills = [
+                "连击的极意", "潜在觉醒", "皇室战技", "鲜血反击", "贵族特权",
+                "持心机械", "仁义的回报", "崭露头角", "神树之力", "忠犬之爱",
+                "誓言之刃", "改良机体", "十全的显现", "龙骑士修行", "丰收之喜",
+                "新绿的加护", "人造体的同步", "堕天之觉悟", "人造体的解放", "无二之虚构",
+                "凤凰的宴客", "力量的聚集", "意识的复苏", "狸猫幻术", "不可视的技艺", "炽天使的祝福"
+            ];
+
+            // 添加主动技能选项
+            activeSkills.forEach((skill, index) => {
+                activeSkillSelect.innerHTML += `<option value="skill${index + 1}">${skill}</option>`;
+            });
+
+            // 添加被动技能选项
+            passiveSkills.forEach((skill, index) => {
+                passiveSkillSelect.innerHTML += `<option value="skill${index + 1}">${skill}</option>`;
+            });
+
+            // 根据选择的主站者自动填充技能
+            if (img.src.includes("001-Arisa.jpg")) {
+                // 当选择的主站者是 Arisa 时，自动选择 "连击的极意"
+                passiveSkillSelect.value = "skill1"; // "连击的极意" 是第一个被动技能
+            } else if (img.src.includes("002-Rowen.jpg")) {
+
+                passiveSkillSelect.value = "skill2";
+            } else if (img.src.includes("003-Eris.jpg")) {
+
+                activeSkillSelect.value = "skill1";
+            } else if (img.src.includes("004-Erika.jpg")) {
+
+                passiveSkillSelect.value = "skill3";
+            } else if (img.src.includes("005-Luna.jpg")) {
+
+                activeSkillSelect.value = "skill2";
+            } else if (img.src.includes("006-Yuwan.jpg")) {
+
+                activeSkillSelect.value = "skill3";
+            } else if (img.src.includes("007-Isabelle.jpg")) {
+
+                activeSkillSelect.value = "skill4";
+            } else if (img.src.includes("008-Urias.jpg")) {
+
+                passiveSkillSelect.value = "skill4";
+            } else if (img.src.includes("009-Mordecai.jpg")) {
+
+                activeSkillSelect.value = "skill5";
+            } else if (img.src.includes("010-Dietrich.jpg")) {
+
+                passiveSkillSelect.value = "skill5";
+            } else if (img.src.includes("011-Alexiel.jpg")) {
+
+                activeSkillSelect.value = "skill6";
+            } else if (img.src.includes("012-Tetra.jpg")) {
+
+                passiveSkillSelect.value = "skill6";
+            } else if (img.src.includes("013-Farin.jpg")) {
+
+                activeSkillSelect.value = "skill7";
+            } else if (img.src.includes("014-Flame&Glass.jpg")) {
+
+                activeSkillSelect.value = "skill8";
+            } else if (img.src.includes("015-Drache.jpg")) {
+
+                activeSkillSelect.value = "skill9";
+            } else if (img.src.includes("016-Aisha.jpg")) {
+
+                activeSkillSelect.value = "skill10";
+            } else if (img.src.includes("017-Dionne.jpg")) {
+
+                activeSkillSelect.value = "skill11";
+            } else if (img.src.includes("018-Yuzuki.jpg")) {
+
+                passiveSkillSelect.value = "skill7";
+            } else if (img.src.includes("019-Amy.jpg")) {
+
+                activeSkillSelect.value = "skill12";
+            } else if (img.src.includes("020-Taketsumi.jpg")) {
+
+                passiveSkillSelect.value = "skill8";
+            } else if (img.src.includes("021-Verdilia.jpg")) {
+
+                passiveSkillSelect.value = "skill9";
+            } else if (img.src.includes("022-Wolfraud.jpg")) {
+
+                activeSkillSelect.value = "skill13";
+            } else if (img.src.includes("023-TacticalDog.jpg")) {
+
+                passiveSkillSelect.value = "skill10";
+            } else if (img.src.includes("024-Latham.jpg")) {
+
+                passiveSkillSelect.value = "skill11";
+            } else if (img.src.includes("025-MagnaZero.jpg")) {
+
+                passiveSkillSelect.value = "skill12";
+            } else if (img.src.includes("026-Wilbert.jpg")) {
+
+                activeSkillSelect.value = "skill14";
+            } else if (img.src.includes("027-BellringerAngel.jpg")) {
+
+                activeSkillSelect.value = "skill15";
+            } else if (img.src.includes("028-Teo.jpg")) {
+
+                passiveSkillSelect.value = "skill13";
+            } else if (img.src.includes("029-Iceschillendrig.jpg")) {
+
+                activeSkillSelect.value = "skill16";
+            } else if (img.src.includes("030-Aenea.jpg")) {
+
+                activeSkillSelect.value = "skill17";
+            } else if (img.src.includes("031-Aiela.jpg")) {
+
+                passiveSkillSelect.value = "skill14";
+            } else if (img.src.includes("032-Meowskers.jpg")) {
+
+                passiveSkillSelect.value = "skill15";
+            } else if (img.src.includes("033-Castelle.jpg")) {
+
+                passiveSkillSelect.value = "skill16";
+            } else if (img.src.includes("034-Zecilwenshe.jpg")) {
+
+                activeSkillSelect.value = "skill18";
+            } else if (img.src.includes("035-Spinaria.jpg")) {
+
+                passiveSkillSelect.value = "skill17";
+            } else if (img.src.includes("036-Katya.jpg")) {
+
+                activeSkillSelect.value = "skill19";
+            } else if (img.src.includes("037-Ladica.jpg")) {
+
+                activeSkillSelect.value = "skill20";
+            } else if (img.src.includes("038-Maisha.jpg")) {
+
+                activeSkillSelect.value = "skill21";
+            } else if (img.src.includes("039-Lucifer.jpg")) {
+
+                passiveSkillSelect.value = "skill18";
+            } else if (img.src.includes("040-Kuon.jpg")) {
+
+                activeSkillSelect.value = "skill22";
+            } else if (img.src.includes("041-Lucille.jpg")) {
+
+                passiveSkillSelect.value = "skill19";
+            } else if (img.src.includes("042-Ramina.jpg")) {
+
+                activeSkillSelect.value = "skill23";
+            } else if (img.src.includes("043-WizardessOfOz.jpg")) {
+
+                passiveSkillSelect.value = "skill20";
+            } else if (img.src.includes("044-ResplendentPhoenix.jpg")) {
+
+                passiveSkillSelect.value = "skill21";
+            } else if (img.src.includes("045-Kagero.jpg")) {
+
+                activeSkillSelect.value = "skill24";
+            } else if (img.src.includes("046-Omnis.jpg")) {
+
+                passiveSkillSelect.value = "skill22";
+            } else if (img.src.includes("047-Illganeau.jpg")) {
+
+                passiveSkillSelect.value = "skill23";
+            } else if (img.src.includes("048-Runie.jpg")) {
+
+                activeSkillSelect.value = "skill25";
+            } else if (img.src.includes("049-Nahtnaught.jpg")) {
+
+                activeSkillSelect.value = "skill26";
+            } else if (img.src.includes("050-Rola.jpg")) {
+
+                activeSkillSelect.value = "skill27";
+            } else if (img.src.includes("051-Aluzard.jpg")) {
+
+                activeSkillSelect.value = "skill28";
+            } else if (img.src.includes("052-Hozumi.jpg")) {
+
+                passiveSkillSelect.value = "skill24";
+            } else if (img.src.includes("053-Vincent.jpg")) {
+
+                activeSkillSelect.value = "skill29";
+            } else if (img.src.includes("054-Lyelth.jpg")) {
+
+                passiveSkillSelect.value = "skill25";
+            } else if (img.src.includes("055-Lapis.jpg")) {
+
+                passiveSkillSelect.value = "skill26";
+            } else if (img.src.includes("056-Cerberus.jpg")) {
+                // 当选择的主站者是 Cerberus 时，自动选择 "来自冥界的欢迎"
+                activeSkillSelect.value = "skill30"; // "来自冥界的欢迎" 是最后一个主动技能
+            } closeAvatarModal();
+        }
+
+        // 关闭模态框
+        function closeAvatarModal() {
+            const modal = document.querySelector('.avatar-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+
+
+
+
+        // 默认修改“主动技”和“被动技”列
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeSkillCells = document.querySelectorAll('#record-content table td:nth-child(4)');
+            const passiveSkillCells = document.querySelectorAll('#record-content table td:nth-child(5)');
+
+            activeSkillCells.forEach(cell => {
+                cell.innerHTML = `
+                    <select class="skill-selector" onchange="selectSkill(this, 'active')">
+                        <option value="">选择主动技</option>
+                    </select>
+                `;
+            });
+
+            passiveSkillCells.forEach(cell => {
+                cell.innerHTML = `
+                    <select class="skill-selector" onchange="selectSkill(this, 'passive')">
+                        <option value="">选择被动技</option>
+                    </select>
+                `;
+            });
+        });
+
+        // 默认显示“记录”内容
+        showTab('record');
+        // 保存数据到本地存储
+        function saveData() {
+            const table = document.querySelector('#record-content table');
+            const data = [];
+            for (let i = 1; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const rowData = {
+                    matchNumber: row.cells[1].textContent,
+                    avatar: row.cells[2].querySelector('.avatar-preview').src,
+                    activeSkill: row.cells[3].querySelector('select').value,
+                    passiveSkill: row.cells[4].querySelector('select').value,
+                    rank: row.cells[5].querySelector('select').value,
+                    settlement: row.cells[6].querySelector('input').value,
+                    remark: row.cells[7].querySelector('.remark-input').value
+                };
+                data.push(rowData);
+            }
+            localStorage.setItem('svChessLogData', JSON.stringify(data));
+        }
+
+        // 加载本地存储的数据
+        function loadData() {
+            const data = JSON.parse(localStorage.getItem('svChessLogData'));
+            if (data) {
+                const table = document.querySelector('#record-content table');
+                for (let i = 1; i < table.rows.length; i++) {
+                    const row = table.rows[i];
+                    const rowData = data[i - 1];
+                    row.cells[1].textContent = rowData.matchNumber;
+                    row.cells[2].querySelector('.avatar-preview').src = rowData.avatar;
+                    row.cells[3].querySelector('select').value = rowData.activeSkill;
+                    row.cells[4].querySelector('select').value = rowData.passiveSkill;
+                    row.cells[5].querySelector('select').value = rowData.rank;
+                    row.cells[6].querySelector('input').value = rowData.settlement;
+                    row.cells[7].querySelector('.remark-input').value = rowData.remark;
+                }
+            }
+        }
+
+        // 重置数据
+        function resetData() {
+            if (confirm('确定要重置所有数据吗？')) {
+                localStorage.removeItem('svChessLogData');
+                window.location.reload();
+            }
+        }
+
+        // 监听输入框的变化，自动保存数据
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', saveData);
+        });
+
+        // 页面加载时加载数据
+        window.addEventListener('load', loadData);
+    </script>
+    <div class="footer">
+        <a href="https://github.com/Ohmygoddess4869/svChessLog" target="_blank">开源链接</a>
+    </div>
+</body>
+
+</html>
